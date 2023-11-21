@@ -1,0 +1,34 @@
+---
+title: "HW6"
+author: "Hanxin Zheng"
+date: "2023-11-21"
+output: html_document
+---
+
+```{r}
+library(readxl)
+Fresh_Mango_Import_to_U_S_ <- read_excel("Fresh Mango Import to U.S..xlsx")
+
+library(fpp)
+library(fpp2)
+library(TTR)
+mango_ts=ts(Fresh_Mango_Import_to_U_S_$Vol, frequency=12, start=c(2018,1))
+mango_ts
+plot(mango_ts)
+autoARIMA=auto.arima(mango_ts, stepwise=FALSE, approximation=FALSE, trace=TRUE)
+#Best model: ARIMA(0,0,0)(1,1,0)[12] with drift
+#The best ARIMA model for the mango importation volume to the United is ARIMA(0,0,0)(1,1,0) with drift. Hence, for nonseasonal components of the data, the model took no past value, no recent residuals, and did not differentiate to have the stationary data for the best model, implying that the data was stationary originally for the nonseasonal component. For Seasonal part of the data, the model took last one value and no residuals, as well as differentiated once to have the best model. 
+res=residuals(autoARIMA)
+hist(res)
+#The residuals is approximately follow the normal distribution but not exactly normally distributed, the highest frequency of the mean is a bit more than 0 not 0.
+tsdisplay(res)
+#The residuals are nearly around 0 in 2018 and began fluctuating heavily from 2019 to 2022, especially from end of 2019 to mid of the 2020. The residuals have one line over the significance line in ACF meaning the data could be improved in turns of seasonal data, and the residuals did not exceed the significance line in PACF meaning stationary part of the model is good.
+f_auto=forecast(autoARIMA,h=5)
+plot(f_auto)
+plot(mango_ts)
+lines(f_auto$fitted,col="red")
+f_auto
+#The volume forecast for next 5 month of mango importation to the United States is 48,870.05 pounds on Jan 2023, 68192.33 pounds on Feb 2023, 77074.33 on March 2023, 117048.81 on April 2023, and 122306.69 on May 2023.
+accuracy(f_auto)
+#The MAPE is 10.96% for ARIMA model  
+```
